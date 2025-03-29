@@ -16,12 +16,9 @@ type APIServer struct {
 
 func NewAPIServer(config *config.Config) *APIServer {
 
-
-
-
 	return &APIServer{
-		mux:    http.NewServeMux(),
-		config: config,
+		mux:         http.NewServeMux(),
+		config:      config,
 		handlerUser: handler.NewUserHandler(config),
 	}
 }
@@ -36,4 +33,5 @@ func (s *APIServer) ConfigureRouter() {
 		w.Write([]byte("Hello"))
 	})
 	s.mux.HandleFunc("POST /user/sign-up", s.handlerUser.SignUp)
+	s.mux.Handle("wadwda", s.middleware(http.HandlerFunc(s.handlerUser.SignUp)))
 }
