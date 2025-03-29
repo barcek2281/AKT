@@ -1,8 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "../styles/ScanPage.css";
 
 const ScanPage = () => {
   const [isScanning, setIsScanning] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [error, setError] = useState(null);
+  const videoRef = useRef(null);
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'environment',
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        } 
+      });
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      setIsStreaming(true);
+    } catch (err) {
+      setError('Ошибка при запуске камеры: ' + err.message);
+    }
+  };
+
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const tracks = videoRef.current.srcObject.getTracks();
+      tracks.forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+      setIsStreaming(false);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
 
   const handleScan = () => {
     setIsScanning(true);
@@ -21,6 +58,20 @@ const ScanPage = () => {
         </p>
         
         <div className={`scanner-container ${isScanning ? 'scanning' : ''}`}>
+          {isStreaming ? (
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="camera-preview"
+            />
+          ) : (
+            <img 
+              src="https://i.ibb.co/mzWHZLP/plant.png" 
+              alt="Plant" 
+              className="plant-preview" 
+            />
+          )}
           <div className="scanner-frame">
             <div className="corner top-left"></div>
             <div className="corner top-right"></div>
@@ -28,20 +79,35 @@ const ScanPage = () => {
             <div className="corner bottom-right"></div>
             <div className="scan-line"></div>
           </div>
-          <img 
-            src="https://i.ibb.co/mzWHZLP/plant.png" 
-            alt="Plant" 
-            className="plant-preview" 
-          />
         </div>
 
-        <button 
-          className={`scan-button ${isScanning ? 'scanning' : ''}`}
-          onClick={handleScan}
-          disabled={isScanning}
-        >
-          {isScanning ? 'Сканирование...' : 'Сканировать'}
-        </button>
+        {error && <p className="error-message">{error}</p>}
+
+        <div className="button-container">
+          {!isStreaming ? (
+            <button 
+              className="camera-button"
+              onClick={startCamera}
+            >
+              Включить камеру
+            </button>
+          ) : (
+            <button 
+              className="camera-button stop"
+              onClick={stopCamera}
+            >
+              Выключить камеру
+            </button>
+          )}
+
+          <button 
+            className={`scan-button ${isScanning ? 'scanning' : ''}`}
+            onClick={handleScan}
+            disabled={isScanning || !isStreaming}
+          >
+            {isScanning ? 'Сканирование...' : 'Сканировать'}
+          </button>
+        </div>
       </div>
     </div>
   );
