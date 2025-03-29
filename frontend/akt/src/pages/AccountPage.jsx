@@ -12,6 +12,22 @@ const AccountPage = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedInfo, setEditedInfo] = useState(userInfo);
+  const [userPlants] = useState([
+    {
+      id: 1,
+      name: 'Монстера',
+      addedDate: '15.03.2024',
+      status: 'Активное',
+      lastWatered: '20.03.2024'
+    },
+    {
+      id: 2,
+      name: 'Фикус',
+      addedDate: '10.03.2024',
+      status: 'Активное',
+      lastWatered: '19.03.2024'
+    }
+  ]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -70,15 +86,6 @@ const AccountPage = () => {
 
       <div className="account-content">
         <div className="profile-section">
-          <div className="profile-image">
-            <img src="https://via.placeholder.com/150" alt="Profile" />
-            {isEditing && (
-              <button className="change-photo-button">
-                Изменить фото
-              </button>
-            )}
-          </div>
-
           <div className="user-info">
             <div className="info-group">
               <label>Имя пользователя</label>
@@ -136,7 +143,6 @@ const AccountPage = () => {
                 </button>
               </div>
             ))}
-
           </div>
         </div>
       </div>
