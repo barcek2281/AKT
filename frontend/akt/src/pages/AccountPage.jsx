@@ -6,38 +6,8 @@ const AccountPage = () => {
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState({
     username: 'Gargi',
-    email: 'gargi@example.com'
-  });
-
-  const [userPlants] = useState([
-    {
-      id: 1,
-      name: "Monstera Deliciosa",
-      addedDate: "15.03.2024",
-      status: "Активное",
-      lastWatered: "Вчера"
-    },
-    {
-      id: 2,
-      name: "Fiddle Leaf Fig",
-      addedDate: "20.03.2024",
-      status: "Активное",
-      lastWatered: "2 дня назад"
-    },
-    {
-      id: 3,
-      name: "Snake Plant",
-      addedDate: "25.03.2024",
-      status: "Активное",
-      lastWatered: "3 дня назад"
-    }
-  ]);
-
-  const [userActivity] = useState({
-    totalPlants: 3,
-    totalScans: 5,
-    lastScan: "28.03.2024",
-    favoritePlant: "Monstera Deliciosa"
+    email: 'gargi@example.com',
+    joinDate: '01.01.2024'
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -67,6 +37,10 @@ const AccountPage = () => {
 
   const handleLogout = () => {
     navigate('/');
+  };
+
+  const handleNavigate = (path) => {
+    navigate(path);
   };
 
   return (
@@ -133,49 +107,29 @@ const AccountPage = () => {
                 <p>{userInfo.email}</p>
               )}
             </div>
-          </div>
-        </div>
 
-        <div className="user-activity-section">
-          <h2>Активность пользователя</h2>
-          <div className="activity-grid">
-            <div className="activity-card">
-              <span className="activity-value">{userActivity.totalPlants}</span>
-              <span className="activity-label">Всего растений</span>
-            </div>
-            <div className="activity-card">
-              <span className="activity-value">{userActivity.totalScans}</span>
-              <span className="activity-label">Сканирований</span>
-            </div>
-            <div className="activity-card">
-              <span className="activity-value">{userActivity.lastScan}</span>
-              <span className="activity-label">Последнее сканирование</span>
-            </div>
-            <div className="activity-card">
-              <span className="activity-value">{userActivity.favoritePlant}</span>
-              <span className="activity-label">Любимое растение</span>
+            <div className="info-group">
+              <label>Дата регистрации</label>
+              <p>{userInfo.joinDate}</p>
             </div>
           </div>
         </div>
 
-        <div className="user-plants-section">
-          <h2>Мои растения</h2>
-          <div className="plants-list">
-            {userPlants.map(plant => (
-              <div key={plant.id} className="plant-card">
-                <div className="plant-info">
-                  <h3>{plant.name}</h3>
-                  <div className="plant-details">
-                    <span>Добавлено: {plant.addedDate}</span>
-                    <span>Статус: {plant.status}</span>
-                    <span>Последний полив: {plant.lastWatered}</span>
-                  </div>
-                </div>
-                <button className="view-plant-button" onClick={() => navigate(`/details/${plant.id}`)}>
-                  Подробнее
-                </button>
-              </div>
-            ))}
+        <div className="account-stats">
+          <h2>Статистика</h2>
+          <div className="stats-grid">
+            <div className="stat-card" onClick={() => handleNavigate('/dashboard')}>
+              <span className="stat-value">12</span>
+              <span className="stat-label">Растений</span>
+            </div>
+            <div className="stat-card" onClick={() => handleNavigate('/scan')}>
+              <span className="stat-value">5</span>
+              <span className="stat-label">Сканирований</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-value">3</span>
+              <span className="stat-label">Достижений</span>
+            </div>
           </div>
         </div>
       </div>
