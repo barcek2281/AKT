@@ -42,26 +42,40 @@ const HomePage = () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`, // If using JWT token
-        'X-Requested-With': 'XMLHttpRequest' // Helps indicate AJAX requests
+        'Accept': 'application/json'
       },
-      credentials: 'include',  // Important if using cookies
+      credentials: 'include',
       body: JSON.stringify({
         email: formData.email,
         password: formData.password,
         ...(isLogin ? {} : { username: formData.username })
       })
     })
-    .then(response => response.json()) // Parse JSON response
-    .then(data => {
-      console.log('Ответ сервера:', data);
-      if (data.token) {
-        localStorage.setItem('token', data.token); // Store token if needed
-        navigate('/dashboard'); // Redirect after successful login
+    .then(response => {
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
+      if (!response.ok) {
+        return response.text().then(text => {
+          console.error('Error response:', text);
+          throw new Error(`Ошибка авторизации: ${response.status} - ${text}`);
+        });
       }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Успешная авторизация:', data);
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+      localStorage.setItem('userEmail', formData.email);
+      localStorage.setItem('userData', JSON.stringify(data));
+      navigate("/account");
     })
     .catch(error => {
-      console.error('Ошибка при отправке запроса:', error);
+      console.error('Ошибка:', error);
+      console.error('Stack trace:', error.stack);
+      alert(`Ошибка при ${isLogin ? 'входе' : 'регистрации'}: ${error.message}`);
     });
     
     
