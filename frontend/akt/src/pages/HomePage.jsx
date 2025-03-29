@@ -35,7 +35,7 @@ const HomePage = () => {
     console.log('Отправка запроса на:', url);
     console.log('Данные запроса:', {
       email: formData.email,
-      ...(isLogin ? {} : { username: formData.username })
+      ...(isLogin ? {} : { name: formData.username })
     });
     
     fetch(url, {
@@ -48,6 +48,7 @@ const HomePage = () => {
       body: JSON.stringify({
         email: formData.email,
         password: formData.password,
+        ...(isLogin ? {} : { name: formData.username })
       })
     })
     .then(response => {
@@ -68,7 +69,13 @@ const HomePage = () => {
         localStorage.setItem('token', data.token);
       }
       localStorage.setItem('userEmail', formData.email);
-      localStorage.setItem('userData', JSON.stringify(data));
+      if (!isLogin) {
+        localStorage.setItem('userName', formData.username);
+      }
+      localStorage.setItem('userData', JSON.stringify({
+        ...data,
+        name: isLogin ? data.name : formData.username
+      }));
       navigate("/account");
     })
     .catch(error => {
