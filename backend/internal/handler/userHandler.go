@@ -30,6 +30,15 @@ func NewUserHandler(config *config.Config) *UserHandler {
 	return &UserHandler{db: db, config: config}
 }
 
+// @Summary Sign up a new user
+// @Description Creates a new user account
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param input body UserRequest true "User signup details"
+// @Success 201 {object} UserResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /user/sign-up [post]
 func (u *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {

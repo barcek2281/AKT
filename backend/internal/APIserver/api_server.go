@@ -48,6 +48,9 @@ func (s *APIServer) ConfigureRouter() {
 	s.mux.Handle("POST /microgreen/create", s.middleware(http.HandlerFunc(s.handlerMicroGreen.CreateMicroGreen)))
 	s.mux.HandleFunc("GET /microgreen/get", s.handlerMicroGreen.GetMicroGreen)
 	s.mux.Handle("DELETE /microgreen/delete", s.middleware(http.HandlerFunc(s.handlerMicroGreen.DeleteMicroGreen)))
-	s.mux.Handle("UPT /microgreen/update", s.middleware(http.HandlerFunc(s.handlerMicroGreen.UpdateMicroGreen)))
+	s.mux.Handle("PUT /microgreen/update", s.middleware(http.HandlerFunc(s.handlerMicroGreen.UpdateMicroGreen)))
+
+	s.mux.HandleFunc("POST /microgreen/{sex}", s.handlerMicroGreen.AppendMicroGreen)
+	s.mux.HandleFunc("GET /microgreen/{sex}", s.handlerMicroGreen.DownloadMicroGreen)
 
 }
