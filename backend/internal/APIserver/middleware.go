@@ -20,7 +20,7 @@ type UserClaims struct {
 func (s *APIServer) middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Пропускаем публичные маршруты
-		if r.URL.Path == "/api/users/signup" || r.URL.Path == "/api/users/login" {
+		if r.URL.Path == "/user/sign-up" || r.URL.Path == "/user/login" {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -74,7 +74,7 @@ func (s *APIServer) enableCors(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 
 		// Allow specific headers
-		w.Header().Set("Access-Control-Allow-Headers","Origin, X-Requested-With, Content-Type, Accept")
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 
 		// Handle preflight (OPTIONS) requests
 		if r.Method == "OPTIONS" {
@@ -85,4 +85,3 @@ func (s *APIServer) enableCors(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
-
