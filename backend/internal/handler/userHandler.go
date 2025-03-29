@@ -11,6 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type UserHandler struct {
@@ -132,4 +133,37 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	json.NewEncoder(w).Encode(payload)
+}
+
+// GetInfo возвращает информацию о текущем пользователе
+func (u *UserHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
+    // Получаем email пользователя из контекста (установленного в middleware)
+    ctx := r.Context()
+    email, ok := ctx.Value("user").(string)
+    if !ok || email == "" {
+        respondWithError(w, http.StatusUnauthorized, "User not authenticated")
+        return
+    }
+
+    // Получаем пользователя из базы данных
+    user, err := u.db.UserRepo.GetUserByEmail(email)
+    if err != nil {
+        if err == mongo.ErrNoDocuments {
+            respondWithError(w, http.StatusNotFound, "User not found")
+            return
+        }
+        respondWithError(w, http.StatusInternalServerError, "Failed to get user info")
+        log.Printf("Failed to get user by email: %v", err)
+        return
+    }
+
+    // Не возвращаем пароль и другие чувствительные данные
+    user.Password = ""
+    
+    respondWithJSON(w, http.StatusOK, map[string]interface{}{
+        "user_id": user.ID.Hex(),
+        "email":   user.Email,
+        "name":    user.Name,
+        // Добавьте другие необходимые поля
+    })
 }
