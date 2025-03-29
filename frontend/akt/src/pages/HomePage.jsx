@@ -35,7 +35,7 @@ const HomePage = () => {
     console.log('Отправка запроса на:', url);
     console.log('Данные запроса:', {
       email: formData.email,
-      ...(isLogin ? {} : { username: formData.username })
+      ...(isLogin ? {} : { name: formData.username })
     });
     
     fetch(url, {
@@ -48,33 +48,19 @@ const HomePage = () => {
       body: JSON.stringify({
         email: formData.email,
         password: formData.password,
+        ...(isLogin ? {} : { name: formData.username })
       })
     })
-    .then(response => {
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-      
-      if (!response.ok) {
-        return response.text().then(text => {
-          console.error('Error response:', text);
-          throw new Error(`Ошибка авторизации: ${response.status} - ${text}`);
-        });
-      }
-      return response.json();
-    })
+    .then(response => response.json()) // Parse JSON response
     .then(data => {
-      console.log('Успешная авторизация:', data);
+      console.log('Ответ сервера:', data);
       if (data.token) {
-        localStorage.setItem('token', data.token);
+        localStorage.setItem('token', data.token); // Store token if needed
+        navigate('/dashboard'); // Redirect after successful login
       }
-      localStorage.setItem('userEmail', formData.email);
-      localStorage.setItem('userData', JSON.stringify(data));
-      navigate("/account");
     })
     .catch(error => {
-      console.error('Ошибка:', error);
-      console.error('Stack trace:', error.stack);
-      alert(`Ошибка при ${isLogin ? 'входе' : 'регистрации'}: ${error.message}`);
+      console.error('Ошибка при отправке запроса:', error);
     });
     
     
