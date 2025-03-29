@@ -42,15 +42,29 @@ const HomePage = () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`, // If using JWT token
+        'X-Requested-With': 'XMLHttpRequest' // Helps indicate AJAX requests
       },
+      credentials: 'include',  // Important if using cookies
       body: JSON.stringify({
         email: formData.email,
         password: formData.password,
+        ...(isLogin ? {} : { username: formData.username })
       })
     })
+    .then(response => response.json()) // Parse JSON response
     .then(data => {
-      console.log(JSON.stringify(data))
+      console.log('Ответ сервера:', data);
+      if (data.token) {
+        localStorage.setItem('token', data.token); // Store token if needed
+        navigate('/dashboard'); // Redirect after successful login
+      }
     })
+    .catch(error => {
+      console.error('Ошибка при отправке запроса:', error);
+    });
+    
+    
   };
 
   return (

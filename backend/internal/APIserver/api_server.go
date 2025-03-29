@@ -6,6 +6,7 @@ import (
 
 	"github.com/barcek2281/AKT/backend/internal/config"
 	"github.com/barcek2281/AKT/backend/internal/handler"
+	"github.com/rs/cors"
 )
 
 type APIServer struct {
@@ -34,14 +35,20 @@ const (
 
 func (s *APIServer) Start() error {
 	s.ConfigureRouter()
-	return http.ListenAndServe(fmt.Sprintf(":%d", s.config.BinAddr), s.mux)
+	handler := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"}, // Adjust this based on your frontend URL
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS", "PUT", "DELETE"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization", "Accept", "X-Requested-With"},
+		AllowCredentials: true,
+	}).Handler(s.mux)
+	return http.ListenAndServe(fmt.Sprintf(":%d", s.config.BinAddr), handler)
 }
 
 func (s *APIServer) ConfigureRouter() {
 	s.mux.Handle("OPTIONS /{any}", s.enableCors(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})))
-	
+
 	s.mux.Handle("GET /hello", s.enableCors(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello"))
 	})))
