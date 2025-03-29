@@ -51,22 +51,15 @@ const HomePage = () => {
         ...(isLogin ? {} : { name: formData.username })
       })
     })
-    .then(response => {
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-      
-      if (!response.ok) {
-        return response.text().then(text => {
-          console.error('Error response:', text);
-          throw new Error(`Ошибка авторизации: ${response.status} - ${text}`);
-        });
-      }
-      return response.json();
-    })
+    .then(response => response.json()) // Parse JSON response
     .then(data => {
-      console.log('Успешная авторизация:', data);
+      console.log('Ответ сервера:', data);
       if (data.token) {
         localStorage.setItem('token', data.token);
+        if (!isLogin) {
+          localStorage.setItem('userName', formData.username);
+        }
+        navigate('/account');
       }
       localStorage.setItem('userEmail', formData.email);
       if (!isLogin) {
@@ -79,9 +72,7 @@ const HomePage = () => {
       navigate("/account");
     })
     .catch(error => {
-      console.error('Ошибка:', error);
-      console.error('Stack trace:', error.stack);
-      alert(`Ошибка при ${isLogin ? 'входе' : 'регистрации'}: ${error.message}`);
+      console.error('Ошибка при отправке запроса:', error);
     });
     
     
