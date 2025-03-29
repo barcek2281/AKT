@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/barcek2281/AKT/backend/internal/config"
 	"github.com/barcek2281/AKT/backend/internal/store"
@@ -128,16 +129,33 @@ func (h *MicroGreenHandler) DeleteMicroGreen(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *MicroGreenHandler) AppendMicroGreen(w http.ResponseWriter, r *http.Request) {
-	file, header, err := r.FormFile("file")
+	user_id, ok := r.Context().Value("user_id").(string)
+	if !ok {
+		logrus.Warn("lox")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	file, _, err := r.FormFile("file")
 	if err != nil {
+		log.Warn(err)
 		http.Error(w, "Failed to read file", http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
 
-	log.Info(h.config.AWS_REGION)
+	microgreen := r.FormValue("microgreen")
+	photoNum := r.FormValue("photoNum")
 
-	fileURL, err := h.s3.UploadImage(file, header.Filename)
+	if microgreen == "" || photoNum == "" {
+		logrus.Warn("fail to find metadata", microgreen, photoNum)
+		http.Error(w, "Failed to read metadata", http.StatusBadRequest)
+		return
+	}
+
+	newFilename := strings.Join([]string{user_id, microgreen, photoNum + ".png"}, "/")
+
+	fileURL, err := h.s3.UploadImage(file, newFilename)
 	if err != nil {
 		log.Warn("failed to upload", err)
 		http.Error(w, "Failed to upload image", http.StatusInternalServerError)
@@ -148,7 +166,7 @@ func (h *MicroGreenHandler) AppendMicroGreen(w http.ResponseWriter, r *http.Requ
 	w.Write([]byte(fileURL))
 }
 
-func (h *MicroGreenHandler) DownloadMicroGreen(w  http.ResponseWriter, r *http.Request) {
+func (h *MicroGreenHandler) DownloadMicroGreen(w http.ResponseWriter, r *http.Request) {
 	fileName := r.URL.Query().Get("filename")
 	if fileName == "" {
 		http.Error(w, "Filename is required", http.StatusBadRequest)
