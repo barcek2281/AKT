@@ -64,19 +64,19 @@ func (s *APIServer) middleware(next http.Handler) http.Handler {
 
 func (s *APIServer) enableCors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Allow specific origin (replace with your frontend domain if needed)
-		w.Header().Set("Access-Control-Allow-Origin", "http://your-frontend.com") // Change to your frontend URL
+		// Allow requests only from your frontend
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000") // Change this to your actual frontend URL when in production
 
-		// Allow credentials (important if you're sending cookies)
+		// Allow credentials (for cookies, authorization headers)
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
-		// Allowed methods
+		// Allow specific HTTP methods
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 
-		// Allowed headers
+		// Allow specific headers
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
-		// Handle preflight requests
+		// Handle preflight (OPTIONS) requests
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return
@@ -85,3 +85,4 @@ func (s *APIServer) enableCors(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+

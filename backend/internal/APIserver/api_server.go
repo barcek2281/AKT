@@ -38,6 +38,10 @@ func (s *APIServer) Start() error {
 }
 
 func (s *APIServer) ConfigureRouter() {
+	s.mux.Handle("OPTIONS /{any}", s.enableCors(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})))
+	
 	s.mux.Handle("GET /hello", s.enableCors(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello"))
 	})))
