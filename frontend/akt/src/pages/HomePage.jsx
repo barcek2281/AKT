@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/HomePage.css";
 
 const HomePage = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -23,6 +25,8 @@ const HomePage = () => {
     if (isLogin) {
       // Логика входа
       console.log("Вход:", { email: formData.email, password: formData.password });
+      // После успешного входа перенаправляем на страницу сканирования
+      navigate("/scan");
     } else {
       // Логика регистрации
       if (formData.password !== formData.confirmPassword) {
@@ -30,6 +34,8 @@ const HomePage = () => {
         return;
       }
       console.log("Регистрация:", formData);
+      // После успешной регистрации перенаправляем на страницу входа
+      setIsLogin(true);
     }
   };
 
@@ -37,12 +43,25 @@ const HomePage = () => {
     <div className="home-page">
       <div className="auth-container">
         <div className="auth-header">
-          <h1>{isLogin ? "Вход" : "Регистрация"}</h1>
-          <p className="auth-subtitle">
-            {isLogin
-              ? "Добро пожаловать обратно!"
-              : "Создайте новый аккаунт"}
-          </p>
+          <button className="back-button" onClick={() => navigate(-1)}>
+            ←
+          </button>
+          <h1>{isLogin ? "Добро пожаловать!" : "Создать аккаунт"}</h1>
+        </div>
+
+        <div className="tabs">
+          <div
+            className={`tab ${isLogin ? "active" : ""}`}
+            onClick={() => setIsLogin(true)}
+          >
+            Вход
+          </div>
+          <div
+            className={`tab ${!isLogin ? "active" : ""}`}
+            onClick={() => setIsLogin(false)}
+          >
+            Регистрация
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
@@ -53,6 +72,7 @@ const HomePage = () => {
                 type="text"
                 id="username"
                 name="username"
+                placeholder="Введите имя пользователя"
                 value={formData.username}
                 onChange={handleInputChange}
                 required
@@ -66,6 +86,7 @@ const HomePage = () => {
               type="email"
               id="email"
               name="email"
+              placeholder="Введите email"
               value={formData.email}
               onChange={handleInputChange}
               required
@@ -78,6 +99,7 @@ const HomePage = () => {
               type="password"
               id="password"
               name="password"
+              placeholder="Введите пароль"
               value={formData.password}
               onChange={handleInputChange}
               required
@@ -91,6 +113,7 @@ const HomePage = () => {
                 type="password"
                 id="confirmPassword"
                 name="confirmPassword"
+                placeholder="Подтвердите пароль"
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 required
@@ -105,7 +128,7 @@ const HomePage = () => {
 
         <div className="auth-switch">
           <p>
-            {isLogin ? "Нет аккаунта?" : "Уже есть аккаунт?"}{" "}
+            {isLogin ? "Нет аккаунта? " : "Уже есть аккаунт? "}
             <button
               className="switch-button"
               onClick={() => setIsLogin(!isLogin)}
