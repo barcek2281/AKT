@@ -25,8 +25,8 @@ const HomePage = () => {
     if (isLogin) {
       // Логика входа
       console.log("Вход:", { email: formData.email, password: formData.password });
-      // После успешного входа перенаправляем на страницу сканирования
-      navigate("/scan");
+      // После успешного входа перенаправляем на страницу аккаунта
+      navigate("/account");
     } else {
       // Логика регистрации
       if (formData.password !== formData.confirmPassword) {
@@ -43,9 +43,6 @@ const HomePage = () => {
     <div className="home-page">
       <div className="auth-container">
         <div className="auth-header">
-          <button className="back-button" onClick={() => navigate(-1)}>
-            ←
-          </button>
           <h1>{isLogin ? "Добро пожаловать!" : "Создать аккаунт"}</h1>
         </div>
 

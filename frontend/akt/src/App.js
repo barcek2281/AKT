@@ -4,7 +4,7 @@ import ScanPage from "./pages/ScanPage";
 import DetailsPage from "./pages/DetailsPage";
 import DashboardPage from "./pages/DashboardPage";
 import HomePage from "./pages/HomePage";
-
+import AccountPage from "./pages/AccountPage";
 function App() {
   return (
     // <div className="App">
@@ -29,6 +29,7 @@ function App() {
         <Route path="/scan" element={<ScanPage />} />
         <Route path="/details" element={<DetailsPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/account" element={<AccountPage />} />
       </Routes>
     </Router>
   );
