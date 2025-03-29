@@ -14,6 +14,13 @@ type MicroGreenRepository struct {
 	collection *mongo.Collection
 }
 
+func NewMicroGreenRepository(db *mongo.Database, collectionName string) *MicroGreenRepository {
+	return &MicroGreenRepository{
+		collection: db.Collection(collectionName),
+	}
+}	
+
+
 func (m *MicroGreenRepository) Add(userID string, microgreen models.Microgreen) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/barcek2281/AKT/backend/internal/APIserver"
+	"github.com/barcek2281/AKT/backend/internal/config"
 	"github.com/barcek2281/AKT/backend/internal/store"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
@@ -31,7 +32,7 @@ func init() {
 	log.SetOutput(logrus.StandardLogger().Writer())
 }
 func main() {
-	c := APIserver.NewConfig()
+	c := config.NewConfig()
 	s := APIserver.NewAPIServer(c)
 	store := store.Store{Config: c}
 	store.ConnectMongoDB()

@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/barcek2281/AKT/backend/internal/APIserver"
+	"github.com/barcek2281/AKT/backend/internal/config"
+	"github.com/barcek2281/AKT/backend/internal/repository"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -14,8 +15,35 @@ import (
 var Client *mongo.Client
 
 type Store struct {
-	Client *mongo.Client
-	Config *APIserver.Config
+	Client         *mongo.Client
+	UserRepo       *repository.UserRepository
+	MicrogreenRepo *repository.MicroGreenRepository
+
+	Config *config.Config
+}
+
+func NewStore(config *config.Config) *Store {
+	mongoURI := config.APImongoDB
+	if mongoURI == "" {
+		logrus.Fatal("MONGO environment variable not set")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
+	if err != nil {
+		logrus.Fatalf("Failed to connect to MongoDB: %v", err)
+	}
+
+	userRepo := repository.NewUserRepository(client.Database("akt"), "users")
+	microRepo := repository.NewMicroGreenRepository(client.Database("akt"), "micro_green")
+
+	return &Store{
+		Client:         client,
+		UserRepo:       userRepo,
+		MicrogreenRepo: microRepo,
+	}
 }
 
 func (s *Store) ConnectMongoDB() {
