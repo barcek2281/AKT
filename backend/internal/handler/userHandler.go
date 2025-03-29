@@ -7,7 +7,7 @@ import (
 	"github.com/barcek2281/AKT/backend/internal/config"
 	"github.com/barcek2281/AKT/backend/internal/store"
 	"github.com/barcek2281/AKT/backend/models"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type UserHandler struct {
@@ -24,13 +24,13 @@ func (u *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		w.Write([]byte("Ploho"))
-		logrus.Warn(err)
+		log.Warn(err)
 		return
 	}
 	createdUser, err := u.db.UserRepo.SignUp(user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)
-		logrus.Warn(err)
+		log.Warn(err)
 		return
 	}
 
@@ -38,4 +38,5 @@ func (u *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		"message": "User registered successfully",
 		"user_id": createdUser.ID.Hex(),
 	})
+	log.Info("handle /users/sign-up")
 }
