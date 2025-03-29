@@ -5,20 +5,18 @@ import ScanPage from './pages/ScanPage';
 import DashboardPage from './pages/DashboardPage';
 import DetailsPage from './pages/DetailsPage';
 import AccountPage from './pages/AccountPage';
-import PlantDetailsPage from './pages/PlantDetailsPage';
-import './styles/App.css';
+import './App.css';
 
 function App() {
   return (
     <Router>
-      <div className="app">
+      <div className="App">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/scan" element={<ScanPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/details" element={<DetailsPage />} />
           <Route path="/account" element={<AccountPage />} />
-          <Route path="/details/:id" element={<PlantDetailsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
