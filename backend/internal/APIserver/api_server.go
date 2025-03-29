@@ -12,6 +12,7 @@ type APIServer struct {
 	mux         *http.ServeMux
 	config      *config.Config
 	handlerUser *handler.UserHandler
+	handlerMicroGreen *handler.MicroGreenHandler
 }
 
 func NewAPIServer(config *config.Config) *APIServer {
@@ -20,6 +21,7 @@ func NewAPIServer(config *config.Config) *APIServer {
 		mux:         http.NewServeMux(),
 		config:      config,
 		handlerUser: handler.NewUserHandler(config),
+		handlerMicroGreen: handler.NewMicroGreenHandler(config),
 	}
 }
 
@@ -42,4 +44,6 @@ func (s *APIServer) ConfigureRouter() {
 	s.mux.Handle("POST /user/sign-up", http.HandlerFunc(s.handlerUser.SignUp))
 	s.mux.Handle("POST /user/login", http.HandlerFunc(s.handlerUser.LogIn))
 	s.mux.Handle("GET /user/get-info", s.middleware(http.HandlerFunc(s.handlerUser.GetInfo)))
+
+	s.mux.Handle("POST /microgreen/create", s.middleware(http.HandlerFunc(s.handlerMicroGreen.CreateMicroGreen)))
 }
