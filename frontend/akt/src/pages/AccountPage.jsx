@@ -13,25 +13,69 @@ const AccountPage = () => {
   const [userPlants, setUserPlants] = useState([
     {
       id: 1,
-      name: 'Монстера',
-      addedDate: '2024-03-15',
-      status: 'Активное',
-      lastWatered: '2024-03-20'
+      name: 'Руккола',
+      type: 'Микрозелень',
+      sowing_date: '2024-03-15',
+      substrate: 'Кокосовый',
+      harvest_days: 14,
+      notes: 'Быстрый рост',
+      humadity: 60,
+      atmosphere: 'Sunny',
+      in_house: true,
+      growth_log: [
+        {
+          date: '2024-03-15',
+          height: 0,
+          notes: 'Начало выращивания',
+          photoURL: ''
+        },
+        {
+          date: '2024-03-20',
+          height: 5,
+          notes: 'Хороший рост',
+          photoURL: ''
+        }
+      ]
     },
     {
       id: 2,
-      name: 'Фикус',
-      addedDate: '2024-03-10',
-      status: 'Активное',
-      lastWatered: '2024-03-19'
+      name: 'Базилик',
+      type: 'Микрозелень',
+      sowing_date: '2024-03-10',
+      substrate: 'Торфяной',
+      harvest_days: 12,
+      notes: 'Требует много света',
+      humadity: 65,
+      atmosphere: 'Sunny',
+      in_house: true,
+      growth_log: [
+        {
+          date: '2024-03-10',
+          height: 0,
+          notes: 'Начало выращивания',
+          photoURL: ''
+        },
+        {
+          date: '2024-03-15',
+          height: 4,
+          notes: 'Нормальный рост',
+          photoURL: ''
+        }
+      ]
     }
   ]);
   const [isAddPlantModalOpen, setIsAddPlantModalOpen] = useState(false);
   const [newPlant, setNewPlant] = useState({
     name: '',
-    addedDate: new Date().toISOString().split('T')[0],
-    status: 'Активное',
-    lastWatered: new Date().toISOString().split('T')[0]
+    sowing_date: new Date().toISOString().split('T')[0],
+    substrate: '',
+    harvest_days: 14,
+    notes: '',
+    type: '',
+    humadity: 60,
+    atmosphere: 'Sunny',
+    in_house: true,
+    growth_log: []
   });
 
   // Загружаем данные пользователя при монтировании компонента
@@ -89,17 +133,34 @@ const AccountPage = () => {
     if (newPlant.name.trim()) {
       const newPlantWithId = {
         ...newPlant,
-        id: userPlants.length + 1
+        id: userPlants.length + 1,
+        sowing_date: new Date(newPlant.sowing_date),
+        growth_log: [{
+          date: new Date(),
+          height: 0,
+          notes: 'Начало выращивания',
+          photoURL: ''
+        }]
       };
       setUserPlants([...userPlants, newPlantWithId]);
       setIsAddPlantModalOpen(false);
       setNewPlant({
         name: '',
-        addedDate: new Date().toISOString().split('T')[0],
-        status: 'Активное',
-        lastWatered: new Date().toISOString().split('T')[0]
+        sowing_date: new Date().toISOString().split('T')[0],
+        substrate: '',
+        harvest_days: 14,
+        notes: '',
+        type: '',
+        humadity: 60,
+        atmosphere: 'Sunny',
+        in_house: true,
+        growth_log: []
       });
     }
+  };
+
+  const handleDeletePlant = (id) => {
+    // Реализация удаления растения
   };
 
   return (
@@ -171,16 +232,32 @@ const AccountPage = () => {
             <div key={plant.id} className="plant-card">
               <div className="plant-info">
                 <h3>{plant.name}</h3>
-                <p>Добавлено: {plant.addedDate}</p>
-                <p>Статус: {plant.status}</p>
-                <p>Последний полив: {plant.lastWatered}</p>
+                <p>Тип: {plant.type}</p>
+                <p>Дата посева: {new Date(plant.sowing_date).toLocaleDateString()}</p>
+                <p>Субстрат: {plant.substrate}</p>
+                <p>Дни до сбора: {plant.harvest_days}</p>
+                <p>Влажность: {plant.humadity}%</p>
+                <p>Атмосфера: {plant.atmosphere}</p>
+                <p>Место: {plant.in_house ? 'В помещении' : 'На улице'}</p>
+                {plant.notes && <p>Заметки: {plant.notes}</p>}
+                {plant.growth_log && plant.growth_log.length > 0 && (
+                  <p>Последняя высота: {plant.growth_log[plant.growth_log.length - 1].height} см</p>
+                )}
               </div>
-              <button 
-                className="details-button"
-                onClick={() => handleNavigate(`/details/${plant.id}`)}
-              >
-                Подробнее
-              </button>
+              <div className="plant-actions">
+                <button 
+                  className="details-button"
+                  onClick={() => handleNavigate(`/details/${plant.id}`)}
+                >
+                  Подробнее
+                </button>
+                <button 
+                  className="delete-button"
+                  onClick={() => handleDeletePlant(plant.id)}
+                >
+                  Удалить
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -191,30 +268,94 @@ const AccountPage = () => {
           <div className="modal">
             <h2>Добавить новое растение</h2>
             <div className="modal-content">
-              <div className="form-group">
-                <label>Название растения</label>
-                <input
-                  type="text"
-                  value={newPlant.name}
-                  onChange={(e) => setNewPlant({ ...newPlant, name: e.target.value })}
-                  placeholder="Введите название"
-                />
-              </div>
-              <div className="form-group">
-                <label>Дата добавления</label>
-                <input
-                  type="date"
-                  value={newPlant.addedDate}
-                  onChange={(e) => setNewPlant({ ...newPlant, addedDate: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Дата последнего полива</label>
-                <input
-                  type="date"
-                  value={newPlant.lastWatered}
-                  onChange={(e) => setNewPlant({ ...newPlant, lastWatered: e.target.value })}
-                />
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>Название растения</label>
+                  <input
+                    type="text"
+                    value={newPlant.name}
+                    onChange={(e) => setNewPlant({ ...newPlant, name: e.target.value })}
+                    placeholder="Введите название"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Тип растения</label>
+                  <input
+                    type="text"
+                    value={newPlant.type}
+                    onChange={(e) => setNewPlant({ ...newPlant, type: e.target.value })}
+                    placeholder="Например: Микрозелень"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Дата посева</label>
+                  <input
+                    type="date"
+                    value={newPlant.sowing_date}
+                    onChange={(e) => setNewPlant({ ...newPlant, sowing_date: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Дни до сбора</label>
+                  <input
+                    type="number"
+                    value={newPlant.harvest_days}
+                    onChange={(e) => setNewPlant({ ...newPlant, harvest_days: parseInt(e.target.value) })}
+                    min="1"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Субстрат</label>
+                  <select
+                    value={newPlant.substrate}
+                    onChange={(e) => setNewPlant({ ...newPlant, substrate: e.target.value })}
+                  >
+                    <option value="">Выберите субстрат</option>
+                    <option value="Кокосовый">Кокосовый</option>
+                    <option value="Торфяной">Торфяной</option>
+                    <option value="Гидропонный">Гидропонный</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Влажность (%)</label>
+                  <input
+                    type="number"
+                    value={newPlant.humadity}
+                    onChange={(e) => setNewPlant({ ...newPlant, humadity: parseInt(e.target.value) })}
+                    min="0"
+                    max="100"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Атмосфера</label>
+                  <select
+                    value={newPlant.atmosphere}
+                    onChange={(e) => setNewPlant({ ...newPlant, atmosphere: e.target.value })}
+                  >
+                    <option value="Sunny">Солнечно</option>
+                    <option value="Cloudy">Пасмурно</option>
+                    <option value="Rainy">Дождливо</option>
+                  </select>
+                </div>
+                <div className="form-group checkbox-group" onClick={() => setNewPlant({ ...newPlant, in_house: !newPlant.in_house })}>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={newPlant.in_house}
+                      onChange={(e) => setNewPlant({ ...newPlant, in_house: e.target.checked })}
+                    />
+                    <span>В помещении</span>
+                  </label>
+                </div>
+                <div className="form-group full-width">
+                  <label>Заметки</label>
+                  <textarea
+                    value={newPlant.notes}
+                    onChange={(e) => setNewPlant({ ...newPlant, notes: e.target.value })}
+                    placeholder="Дополнительные заметки..."
+                    rows="2"
+                  />
+                </div>
               </div>
             </div>
             <div className="modal-buttons">
