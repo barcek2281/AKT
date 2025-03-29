@@ -3,6 +3,7 @@ package APIserver
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -16,33 +17,45 @@ type UserClaims struct {
 }
 
 func (s *APIServer) middleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Get token from cookie
-		cookie, err := r.Cookie("token")
-		if err != nil {
-			http.Error(w, "Unauthorized: No token", http.StatusUnauthorized)
-			return
-		}
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        // Пропускаем публичные маршруты
+        if r.URL.Path == "/api/users/signup" || r.URL.Path == "/api/users/login" {
+            next.ServeHTTP(w, r)
+            return
+        }
 
-		tokenString := strings.TrimSpace(cookie.Value)
+        // Получаем токен из cookie
+        cookie, err := r.Cookie("token")
+        if err != nil {
+            http.Error(w, "Unauthorized: No token", http.StatusUnauthorized)
+            return
+        }
 
-		// Parse and validate JWT token
-		claims := &UserClaims{}
-		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			// Ensure the signing method is valid
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-			}
-			return s.config.JwtKey, nil
-		})
+        tokenString := strings.TrimSpace(cookie.Value)
 
-		if err != nil || !token.Valid {
-			http.Error(w, "Unauthorized: Invalid token", http.StatusUnauthorized)
-			return
-		}
+        // Парсим токен
+        claims := &UserClaims{}
+        token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+            if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+                return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+            }
+            // Убедитесь, что s.config.JwtKey является []byte
+            return []byte(s.config.JwtKey), nil // Конвертируем строку в []byte
+        })
 
-		// Add user claims to the context
-		ctx := context.WithValue(r.Context(), "user", claims.Username)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+        if err != nil {
+            log.Printf("JWT validation error: %v", err)
+            http.Error(w, "Unauthorized: Invalid token", http.StatusUnauthorized)
+            return
+        }
+
+        if !token.Valid {
+            http.Error(w, "Unauthorized: Invalid token", http.StatusUnauthorized)
+            return
+        }
+
+        // Добавляем claims в контекст
+        ctx := context.WithValue(r.Context(), "user", claims.Username)
+        next.ServeHTTP(w, r.WithContext(ctx))
+    })
 }
