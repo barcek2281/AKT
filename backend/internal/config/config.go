@@ -1,4 +1,4 @@
-package APIserver
+package config
 
 import (
 	"os"
