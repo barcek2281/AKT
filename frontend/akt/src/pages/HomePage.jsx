@@ -22,39 +22,60 @@ const HomePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const endpoint = isLogin ? '/user/login' : '/user/sign-up';
-    console.log(isLogin ? '/user/login' : '/user/sign-up');
-    try {
-      await fetch(`https://akt-win6.onrender.com${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          ...(isLogin ? {} : { username: formData.username })
-        })
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Ошибка авторизации');
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log('Успешная авторизация:', data);
-        // Сохраняем данные пользователя
-        localStorage.setItem('userEmail', formData.email);
-        localStorage.setItem('userData', JSON.stringify(data));
-        navigate("/account");
-      })
-    } catch (error) {
-      console.error('Ошибка:', error);
-      alert('Ошибка при входе. Пожалуйста, проверьте данные и попробуйте снова.');      
+    
+    // Проверяем пароли при регистрации
+    if (!isLogin && formData.password !== formData.confirmPassword) {
+      alert("Пароли не совпадают!");
+      return;
     }
+
+    const endpoint = isLogin ? '/user/login' : '/user/sign-up';
+    const url = `https://akt-win6.onrender.com${endpoint}`;
+    
+    console.log('Отправка запроса на:', url);
+    console.log('Данные запроса:', {
+      email: formData.email,
+      ...(isLogin ? {} : { name: formData.username })
+    });
+    
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+        ...(isLogin ? {} : { name: formData.username })
+      })
+    })
+    .then(response => response.json()) // Parse JSON response
+    .then(data => {
+      console.log('Ответ сервера:', data);
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        if (!isLogin) {
+          localStorage.setItem('userName', formData.username);
+        }
+        navigate('/account');
+      }
+      localStorage.setItem('userEmail', formData.email);
+      if (!isLogin) {
+        localStorage.setItem('userName', formData.username);
+      }
+      localStorage.setItem('userData', JSON.stringify({
+        ...data,
+        name: isLogin ? data.name : formData.username
+      }));
+      navigate("/account");
+    })
+    .catch(error => {
+      console.error('Ошибка при отправке запроса:', error);
+    });
+    
+    
   };
 
   return (

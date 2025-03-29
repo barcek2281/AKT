@@ -20,7 +20,7 @@ type UserClaims struct {
 func (s *APIServer) middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Пропускаем публичные маршруты
-		if r.URL.Path == "/api/users/signup" || r.URL.Path == "/api/users/login" {
+		if r.URL.Path == "/user/sign-up" || r.URL.Path == "/user/login" {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -64,15 +64,24 @@ func (s *APIServer) middleware(next http.Handler) http.Handler {
 
 func (s *APIServer) enableCors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept")
+		// Allow requests only from your frontend
+		w.Header().Set("Access-Control-Allow-Origin", "*") // Change this to your actual frontend URL when in production
+
+		// Allow credentials (for cookies, authorization headers)
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
+		// Allow specific HTTP methods
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+
+		// Allow specific headers
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+
+		// Handle preflight (OPTIONS) requests
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
+
 		next.ServeHTTP(w, r)
 	})
 }

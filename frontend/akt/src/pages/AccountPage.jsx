@@ -43,7 +43,7 @@ const AccountPage = () => {
       try {
         const parsedData = JSON.parse(userData);
         setUserInfo({
-          username: parsedData.username || 'Пользователь',
+          username: parsedData.name || 'Пользователь',
           email: userEmail || parsedData.email || 'Нет email'
         });
       } catch (error) {
@@ -74,10 +74,6 @@ const AccountPage = () => {
   };
 
   const handleLogout = () => {
-    // Очищаем данные пользователя из localStorage
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userData');
-    // Перенаправляем на главную страницу
     navigate('/');
   };
 
