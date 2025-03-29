@@ -32,6 +32,6 @@ func (s *APIServer) ConfigureRouter() {
 	s.mux.HandleFunc("GET /hello", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello"))
 	})
+
 	s.mux.HandleFunc("POST /user/sign-up", s.handlerUser.SignUp)
-	s.mux.Handle("wadwda", s.middleware(http.HandlerFunc(s.handlerUser.SignUp)))
 }
