@@ -11,7 +11,8 @@ import (
 
 type UserClaims struct {
 	Username string `json:"username"`
-	jwt.RegisteredClaims
+	Email  string `json:"email"`
+	jwt.RegisteredClaims	
 }
 
 func (s *APIServer) middleware(next http.Handler) http.Handler {
