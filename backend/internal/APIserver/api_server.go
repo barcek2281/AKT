@@ -3,6 +3,7 @@ package APIserver
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/barcek2281/AKT/backend/internal/config"
 	"github.com/barcek2281/AKT/backend/internal/handler"
@@ -36,16 +37,26 @@ const (
 func (s *APIServer) Start() error {
 	s.ConfigureRouter()
 	handler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"}, // Adjust this based on your frontend URL
+		AllowedOrigins:   []string{"http://localhost:3000", "https://akt-win6.onrender.com"},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS", "PUT", "DELETE"},
-		AllowedHeaders:   []string{"Content-Type", "Authorization", "Accept", "X-Requested-With"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization", "Accept"},
 		AllowCredentials: true,
+		MaxAge:           3600,
 	}).Handler(s.mux)
+
+	// Проверяем наличие SSL-сертификатов
+	certFile := os.Getenv("SSL_CERT_FILE")
+	keyFile := os.Getenv("SSL_KEY_FILE")
+
+	if certFile != "" && keyFile != "" {
+		return http.ListenAndServeTLS(fmt.Sprintf(":%d", s.config.BinAddr), certFile, keyFile, handler)
+	}
+
 	return http.ListenAndServe(fmt.Sprintf(":%d", s.config.BinAddr), handler)
 }
 
 func (s *APIServer) ConfigureRouter() {
-	s.mux.Handle("GET /hello", (http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	s.mux.Handle("GET /helo", (http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello"))
 	})))
 	s.mux.Handle("POST /user/sign-up", (http.HandlerFunc(s.handlerUser.SignUp)))

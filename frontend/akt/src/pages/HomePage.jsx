@@ -48,7 +48,6 @@ const HomePage = () => {
       body: JSON.stringify({
         email: formData.email,
         password: formData.password,
-        ...(isLogin ? {} : { username: formData.username })
       })
     })
     .then(response => {
