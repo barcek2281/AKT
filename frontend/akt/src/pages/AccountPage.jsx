@@ -159,7 +159,10 @@ const AccountPage = () => {
         </div>
 
         <div className="user-plants-section">
-          <h2>Мои растения</h2>
+          <div className='user-plants-header'>
+            <h2>Мои растения</h2>
+            <button> + </button>
+          </div>
           <div className="plants-list">
             {userPlants.map(plant => (
               <div key={plant.id} className="plant-card">

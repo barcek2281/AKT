@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { use, useState } from 'react';
 import '../styles/DetailsPage.css';
 
 const DetailsPage = () => {
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="details-page">
       <div className="details-header">
@@ -48,8 +51,17 @@ const DetailsPage = () => {
           </div>
         </div>
 
-        <button className="view-more-button">View More</button>
+        <button className="view-more-button" onClick={() => setIsModalOpen(true)}>View More</button>
       </div>
+        {isModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <span className="close-button" onClick={() => setIsModalOpen(false)}>&times;</span>
+            <h2>Wild Stone Plant - More Details</h2>
+            <p>Here you can add more detailed information about the plant, its care, and other characteristics.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
