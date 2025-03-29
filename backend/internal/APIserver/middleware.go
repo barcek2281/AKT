@@ -17,7 +17,6 @@ type UserClaims struct {
     jwt.RegisteredClaims
 }
 
-
 func (s *APIServer) middleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         // Пропускаем публичные маршруты
@@ -35,9 +34,9 @@ func (s *APIServer) middleware(next http.Handler) http.Handler {
 
         tokenString := strings.TrimSpace(cookie.Value)
 
-        // Парсим токен
-        claims := &UserClaims{}
-        token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+        // Парсим токен с использованием MapClaims
+        claims := jwt.MapClaims{}
+        token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
             if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
                 return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
             }
@@ -50,11 +49,15 @@ func (s *APIServer) middleware(next http.Handler) http.Handler {
             return
         }
 
-        // Добавляем claims в контекст
-        ctx := r.Context()
-        ctx = context.WithValue(ctx, userEmailKey, claims.Email)
-        ctx = context.WithValue(ctx, userIDKey, claims.UserID) // Убедитесь, что UserClaims содержит UserID
-        
+        // Извлекаем email из claims
+        email, ok := claims["email"].(string)
+        if !ok || email == "" {
+            http.Error(w, "Unauthorized: Invalid token claims", http.StatusUnauthorized)
+            return
+        }
+
+        // Добавляем email в контекст
+        ctx := context.WithValue(r.Context(), "user_email", email)
         next.ServeHTTP(w, r.WithContext(ctx))
     })
 }	

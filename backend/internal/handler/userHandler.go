@@ -135,11 +135,10 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	json.NewEncoder(w).Encode(payload)
 }
 
-// GetInfo возвращает информацию о текущем пользователе
 func (u *UserHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
-    // Получаем email пользователя из контекста (установленного в middleware)
+    // Получаем email пользователя из контекста
     ctx := r.Context()
-    email, ok := ctx.Value("user").(string)
+    email, ok := ctx.Value("user_email").(string)
     if !ok || email == "" {
         respondWithError(w, http.StatusUnauthorized, "User not authenticated")
         return
@@ -157,13 +156,10 @@ func (u *UserHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Не возвращаем пароль и другие чувствительные данные
-    user.Password = ""
-    
+    // Формируем ответ без чувствительных данных
     respondWithJSON(w, http.StatusOK, map[string]interface{}{
         "user_id": user.ID.Hex(),
         "email":   user.Email,
         "name":    user.Name,
-        // Добавьте другие необходимые поля
     })
 }
