@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ScanPage from "./pages/ScanPage";
 import DetailsPage from "./pages/DetailsPage";
 import DashboardPage from "./pages/DashboardPage";
+import HomePage from "./pages/HomePage";
 
 function App() {
   return (
@@ -23,12 +24,13 @@ function App() {
     //   </header>
     // </div>
     <Router>
-    <Routes>
-      <Route path="/" element={<ScanPage />} />
-      <Route path="/details" element={<DetailsPage />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
-    </Routes>
-  </Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/scan" element={<ScanPage />} />
+        <Route path="/details" element={<DetailsPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+      </Routes>
+    </Router>
   );
 }
 
