@@ -22,7 +22,7 @@ const HomePage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const endpoint = isLogin ? '/users/login' : '/users/sign-up';
+    const endpoint = isLogin ? '/user/login' : '/user/sign-up';
     
     // Отправляем данные на бэкенд
     fetch(`https://akt-win6.onrender.com${endpoint}`, {
