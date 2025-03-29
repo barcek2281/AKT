@@ -25,6 +25,8 @@ const HomePage = () => {
     if (isLogin) {
       // Логика входа
       console.log("Вход:", { email: formData.email, password: formData.password });
+
+      
       // После успешного входа перенаправляем на страницу аккаунта
       navigate("/account");
     } else {

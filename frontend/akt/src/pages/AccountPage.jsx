@@ -12,6 +12,7 @@ const AccountPage = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedInfo, setEditedInfo] = useState(userInfo);
+  const [userPlants, setUserPlants] = useState([]);
 
   const handleEdit = () => {
     setIsEditing(true);
