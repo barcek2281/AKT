@@ -55,8 +55,11 @@ const HomePage = () => {
     .then(data => {
       console.log('Ответ сервера:', data);
       if (data.token) {
-        localStorage.setItem('token', data.token); // Store token if needed
-        navigate('/dashboard'); // Redirect after successful login
+        localStorage.setItem('token', data.token);
+        if (!isLogin) {
+          localStorage.setItem('userName', formData.username);
+        }
+        navigate('/account');
       }
     })
     .catch(error => {
