@@ -47,6 +47,7 @@ func (s *S3AWS) UploadImage(file multipart.File, fileName string) (string, error
 		Bucket: aws.String(s.BucketName),
 		Key:    aws.String(fileName),
 		Body:   bytes.NewReader(fileBytes),
+		ACL:    "public-read", // Makes the object public
 	})
 	if err != nil {
 		return "", err
@@ -65,5 +66,6 @@ func (s *S3AWS) DownloadImage(fileName string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	
 	return presignedURL.URL, nil
 }
