@@ -50,14 +50,14 @@ func (s *APIServer) middleware(next http.Handler) http.Handler {
         }
 
         // Извлекаем email из claims
-        email, ok := claims["email"].(string)
-        if !ok || email == "" {
+        user_id, ok := claims["user_id"].(string)
+        if !ok || user_id == "" {
             http.Error(w, "Unauthorized: Invalid token claims", http.StatusUnauthorized)
             return
         }
 
         // Добавляем email в контекст
-        ctx := context.WithValue(r.Context(), "user_email", email)
+        ctx := context.WithValue(r.Context(), "user_id", user_id)
         next.ServeHTTP(w, r.WithContext(ctx))
     })
 }	

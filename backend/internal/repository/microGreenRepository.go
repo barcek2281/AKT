@@ -18,8 +18,7 @@ func NewMicroGreenRepository(db *mongo.Database, collectionName string) *MicroGr
 	return &MicroGreenRepository{
 		collection: db.Collection(collectionName),
 	}
-}	
-
+}
 
 func (m *MicroGreenRepository) Add(userID string, microgreen models.Microgreen) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -61,4 +60,35 @@ func (r *MicroGreenRepository) GetMicrogreensByUser(userID string) ([]models.Mic
 	}
 
 	return microgreens, nil
+}
+
+func (r *MicroGreenRepository) Update(userID string, microgreen models.Microgreen) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	objectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.M{"_id": microgreen.ID, "user_id": objectID}
+	update := bson.M{"$set": microgreen}
+
+	_, err = r.collection.UpdateOne(ctx, filter, update)
+	return err
+}
+
+func (r *MicroGreenRepository) Delete(userID string, microgreenID primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	objectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.M{"_id": microgreenID, "user_id": objectID}
+
+	_, err = r.collection.DeleteOne(ctx, filter)
+	return err
 }
