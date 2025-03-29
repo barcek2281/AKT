@@ -103,18 +103,16 @@ func (u *UserHandler) LogIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UserHandler) generateJWT(userID primitive.ObjectID, email string) (string, error) {
-    claims := UserClaims{
-        UserID:   userID.Hex(),
-        Email:    email,
-        Username: email, // или другое имя пользователя
-        RegisteredClaims: jwt.RegisteredClaims{
-            ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-        },
-    }
+	claims := jwt.MapClaims{
+		"user_id": userID.Hex(),
+		"email":   email,
+		"exp":     time.Now().Add(time.Hour * 24).Unix(), // Токен на 24 часа
+	}
 
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    return token.SignedString([]byte(u.config.JwtKey))
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(u.config.JwtKey))
 }
+
 func setAuthCookie(w http.ResponseWriter, token string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
@@ -137,10 +135,11 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	json.NewEncoder(w).Encode(payload)
 }
 
+// GetInfo возвращает информацию о текущем пользователе
 func (u *UserHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
-    // Получаем email пользователя из контекста
+    // Получаем email пользователя из контекста (установленного в middleware)
     ctx := r.Context()
-    email, ok := ctx.Value(userEmailKey).(string)
+    email, ok := ctx.Value("user").(string)
     if !ok || email == "" {
         respondWithError(w, http.StatusUnauthorized, "User not authenticated")
         return
@@ -158,12 +157,13 @@ func (u *UserHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Не возвращаем пароль
+    // Не возвращаем пароль и другие чувствительные данные
     user.Password = ""
     
     respondWithJSON(w, http.StatusOK, map[string]interface{}{
         "user_id": user.ID.Hex(),
         "email":   user.Email,
         "name":    user.Name,
+        // Добавьте другие необходимые поля
     })
 }
