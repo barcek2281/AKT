@@ -64,26 +64,24 @@ func (s *APIServer) middleware(next http.Handler) http.Handler {
 
 func (s *APIServer) enableCors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Устанавливаем CORS заголовки
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Accept")
+		// Allow specific origin (replace with your frontend domain if needed)
+		w.Header().Set("Access-Control-Allow-Origin", "http://your-frontend.com") // Change to your frontend URL
+
+		// Allow credentials (important if you're sending cookies)
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
-		// Обрабатываем preflight запрос
-		// if r.Method == "OPTIONS" {
-		// 	// Для preflight запросов не выполняем перенаправления
-		// 	w.WriteHeader(http.StatusOK)
-		// 	return
-		// }
+		// Allowed methods
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 
-		// Если это не preflight запрос, добавляем заголовки безопасности
-		w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		w.Header().Set("X-Frame-Options", "DENY")
-		w.Header().Set("X-XSS-Protection", "1; mode=block")
+		// Allowed headers
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
-		// Продолжаем обработку запроса
+		// Handle preflight requests
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
 		next.ServeHTTP(w, r)
 	})
 }
