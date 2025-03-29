@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"net/http"
-
 	"github.com/barcek2281/AKT/backend/internal/config"
 	"github.com/barcek2281/AKT/backend/internal/store"
 )
@@ -21,6 +19,11 @@ func NewMicroGreenHandler(config *config.Config) *MicroGreenHandler {
 	}
 }
 
-func (h *MicroGreenHandler) CreateMicroGreen(w http.ResponseWriter, r *http.Request) {
-	
-}
+// func (h *MicroGreenHandler) CreateMicroGreen(w http.ResponseWriter, r *http.Request) {
+// 	user, ok := r.Context().Value("user").(string)
+// 	if !ok {
+// 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+// 		return
+// 	}
+
+// }
