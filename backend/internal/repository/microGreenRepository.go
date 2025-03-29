@@ -92,3 +92,22 @@ func (r *MicroGreenRepository) Delete(userID string, microgreenID primitive.Obje
 	_, err = r.collection.DeleteOne(ctx, filter)
 	return err
 }
+
+func (r *MicroGreenRepository) GetFromName(userID string, name string) (*models.Microgreen, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	objectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.M{"user_id": objectID, "name": name}
+	var microgreen models.Microgreen
+	err = r.collection.FindOne(ctx, filter).Decode(&microgreen)
+	if err != nil {
+		return nil, err
+	}
+
+	return &microgreen, nil
+}

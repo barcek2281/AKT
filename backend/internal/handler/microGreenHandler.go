@@ -137,22 +137,24 @@ func (h *MicroGreenHandler) AppendMicroGreenLog(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	microgreenID := r.FormValue("microgreen_id")
+	name := r.FormValue("name")
+
 	heightStr := r.FormValue("height")
 	notes := r.FormValue("notes")
 
-	if microgreenID == "" || heightStr == "" {
+	if name == "" || heightStr == "" {
 		logrus.Warn("Missing required fields")
 		http.Error(w, "Missing required fields", http.StatusBadRequest)
 		return
 	}
 
-	objectID, err := primitive.ObjectIDFromHex(microgreenID)
+	me, err := h.db.MicrogreenRepo.GetFromName(userID, name)
 	if err != nil {
-		logrus.Warn("Invalid microgreen ID format", err)
-		http.Error(w, "Invalid ID format", http.StatusBadRequest)
+		log.Warn(err)
+		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
+	microgreenID := (*me).ID
 
 	height, err := strconv.ParseFloat(heightStr, 64)
 	if err != nil {
@@ -173,12 +175,12 @@ func (h *MicroGreenHandler) AppendMicroGreenLog(w http.ResponseWriter, r *http.R
 	var res models.Microgreen
 
 	for _, m := range modelsGAYS {
-		if m.ID == objectID {
+		if m.ID == microgreenID {
 			res = m
 		}
 	}
 
-	newFilename := strings.Join([]string{userID, microgreenID, strconv.Itoa(len(res.GrowthLog)+1)}, "/")
+	newFilename := strings.Join([]string{userID, res.Name, strconv.Itoa(len(res.GrowthLog)+1) + ".png"}, "/")
 	fileURL, err := h.s3.UploadImage(file, newFilename)
 	if err != nil {
 		logrus.Warn("Failed to upload image", err)
