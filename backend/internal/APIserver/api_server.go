@@ -3,7 +3,6 @@ package APIserver
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/barcek2281/AKT/backend/internal/config"
 	"github.com/barcek2281/AKT/backend/internal/handler"
@@ -44,14 +43,6 @@ func (s *APIServer) Start() error {
 		MaxAge:           3600,
 	}).Handler(s.mux)
 
-	// Проверяем наличие SSL-сертификатов
-	certFile := os.Getenv("SSL_CERT_FILE")
-	keyFile := os.Getenv("SSL_KEY_FILE")
-
-	if certFile != "" && keyFile != "" {
-		return http.ListenAndServeTLS(fmt.Sprintf(":%d", s.config.BinAddr), certFile, keyFile, handler)
-	}
-
 	return http.ListenAndServe(fmt.Sprintf(":%d", s.config.BinAddr), handler)
 }
 
@@ -59,16 +50,16 @@ func (s *APIServer) ConfigureRouter() {
 	s.mux.Handle("GET /helo", (http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello"))
 	})))
-	s.mux.Handle("POST /user/sign-up", (http.HandlerFunc(s.handlerUser.SignUp)))
-	s.mux.Handle("POST /user/login", (http.HandlerFunc(s.handlerUser.LogIn)))
-	s.mux.Handle("GET /user/get-info", (s.middleware(http.HandlerFunc(s.handlerUser.GetInfo))))
+	s.mux.Handle("POST /user/sign-up", http.HandlerFunc(s.handlerUser.SignUp))
+	s.mux.Handle("POST /user/login", http.HandlerFunc(s.handlerUser.LogIn))
+	s.mux.Handle("GET /user/get-info", s.middleware(http.HandlerFunc(s.handlerUser.GetInfo)))
 
-	s.mux.Handle("POST /microgreen/create", (s.middleware(http.HandlerFunc(s.handlerMicroGreen.CreateMicroGreen))))
-	s.mux.Handle("GET /microgreen/get", (http.HandlerFunc(s.handlerMicroGreen.GetMicroGreen)))
-	s.mux.Handle("DELETE /microgreen/delete", (s.middleware(http.HandlerFunc(s.handlerMicroGreen.DeleteMicroGreen))))
-	s.mux.Handle("PUT /microgreen/update", (s.middleware(http.HandlerFunc(s.handlerMicroGreen.UpdateMicroGreen))))
+	s.mux.Handle("POST /microgreen/create", s.middleware(http.HandlerFunc(s.handlerMicroGreen.CreateMicroGreen)))
+	s.mux.Handle("GET /microgreen/get", s.middleware(http.HandlerFunc(s.handlerMicroGreen.GetMicroGreen)))
+	s.mux.Handle("DELETE /microgreen/delete", s.middleware(http.HandlerFunc(s.handlerMicroGreen.DeleteMicroGreen)))
+	s.mux.Handle("PUT /microgreen/update", s.middleware(http.HandlerFunc(s.handlerMicroGreen.UpdateMicroGreen)))
 
-	s.mux.Handle("POST /microgreen/{sex}", (s.middleware(http.HandlerFunc(s.handlerMicroGreen.AppendMicroGreen))))
-	s.mux.Handle("GET /microgreen/{sex}", (http.HandlerFunc(s.handlerMicroGreen.DownloadMicroGreen)))
+	s.mux.Handle("POST /microgreen/{id}", s.middleware(http.HandlerFunc(s.handlerMicroGreen.AppendMicroGreenLog)))
+	s.mux.Handle("GET /microgreen/{id}", http.HandlerFunc(s.handlerMicroGreen.DownloadMicroGreen))
 
 }
