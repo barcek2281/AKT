@@ -43,7 +43,7 @@ const AccountPage = () => {
       try {
         const parsedData = JSON.parse(userData);
         setUserInfo({
-          username: parsedData.username || 'Пользователь',
+          username: parsedData.name || 'Пользователь',
           email: userEmail || parsedData.email || 'Нет email'
         });
       } catch (error) {

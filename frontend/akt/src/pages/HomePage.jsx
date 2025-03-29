@@ -61,6 +61,15 @@ const HomePage = () => {
         }
         navigate('/account');
       }
+      localStorage.setItem('userEmail', formData.email);
+      if (!isLogin) {
+        localStorage.setItem('userName', formData.username);
+      }
+      localStorage.setItem('userData', JSON.stringify({
+        ...data,
+        name: isLogin ? data.name : formData.username
+      }));
+      navigate("/account");
     })
     .catch(error => {
       console.error('Ошибка при отправке запроса:', error);
