@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AccountPage.css';
 
@@ -7,8 +7,8 @@ const AccountPage = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   const [userInfo, setUserInfo] = useState({
-    username: 'Иван Иванов',
-    email: 'ivan@example.com'
+    username: '',
+    email: ''
   });
   const [userPlants, setUserPlants] = useState([
     {
@@ -34,6 +34,32 @@ const AccountPage = () => {
     lastWatered: new Date().toISOString().split('T')[0]
   });
 
+  // Загружаем данные пользователя при монтировании компонента
+  useEffect(() => {
+    const userData = localStorage.getItem('userData');
+    const userEmail = localStorage.getItem('userEmail');
+    
+    if (userData) {
+      try {
+        const parsedData = JSON.parse(userData);
+        setUserInfo({
+          username: parsedData.username || 'Пользователь',
+          email: userEmail || parsedData.email || 'Нет email'
+        });
+      } catch (error) {
+        console.error('Ошибка при парсинге данных пользователя:', error);
+        setUserInfo({
+          username: 'Пользователь',
+          email: userEmail || 'Нет email'
+        });
+      }
+    } else {
+      setUserInfo({
+        username: 'Пользователь',
+        email: userEmail || 'Нет email'
+      });
+    }
+  }, []);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -48,6 +74,10 @@ const AccountPage = () => {
   };
 
   const handleLogout = () => {
+    // Очищаем данные пользователя из localStorage
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userData');
+    // Перенаправляем на главную страницу
     navigate('/');
   };
 

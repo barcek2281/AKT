@@ -22,23 +22,39 @@ const HomePage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (isLogin) {
-      // Логика входа
-      console.log("Вход:", { email: formData.email, password: formData.password });
-
-      
-      // После успешного входа перенаправляем на страницу аккаунта
-      navigate("/account");
-    } else {
-      // Логика регистрации
-      if (formData.password !== formData.confirmPassword) {
-        alert("Пароли не совпадают!");
-        return;
+    const endpoint = isLogin ? '/users/login' : '/users/sign-up';
+    
+    // Отправляем данные на бэкенд
+    fetch(`https://akt-win6.onrender.com${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+        ...(isLogin ? {} : { username: formData.username })
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Ошибка авторизации');
       }
-      console.log("Регистрация:", formData);
-      // После успешной регистрации перенаправляем на страницу входа
-      setIsLogin(true);
-    }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Успешная авторизация:', data);
+      // Сохраняем данные пользователя
+      localStorage.setItem('userEmail', formData.email);
+      localStorage.setItem('userData', JSON.stringify(data));
+      navigate("/account");
+    })
+    .catch(error => {
+      console.error('Ошибка:', error);
+      alert('Ошибка при входе. Пожалуйста, проверьте данные и попробуйте снова.');
+    });
   };
 
   return (
