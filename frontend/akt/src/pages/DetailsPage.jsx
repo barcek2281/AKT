@@ -5,13 +5,7 @@ const DetailsPage = () => {
   return (
     <div className="details-page">
       <div className="details-header">
-        <button className="back-button">
-          <i className="fas fa-arrow-left"></i>
-        </button>
         <h1>Plant Details</h1>
-        <button className="share-button">
-          <i className="fas fa-share-alt"></i>
-        </button>
       </div>
 
       <div className="plant-image-container">
