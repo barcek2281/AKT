@@ -14,14 +14,19 @@ import (
 
 type MicroGreenHandler struct {
 	db     *store.Store
+	s3     *store.S3AWS
 	config *config.Config
 }
 
 func NewMicroGreenHandler(config *config.Config) *MicroGreenHandler {
 	db := store.NewStore(config)
-
+	s3, err := store.NewS3AWS(config)
+	if err != nil {
+		log.Fatal("lox")
+	}
 	return &MicroGreenHandler{
 		db:     db,
+		s3:     s3,
 		config: config,
 	}
 }
@@ -120,4 +125,42 @@ func (h *MicroGreenHandler) DeleteMicroGreen(w http.ResponseWriter, r *http.Requ
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *MicroGreenHandler) AppendMicroGreen(w http.ResponseWriter, r *http.Request) {
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "Failed to read file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	log.Info(h.config.AWS_REGION)
+
+	fileURL, err := h.s3.UploadImage(file, header.Filename)
+	if err != nil {
+		log.Warn("failed to upload", err)
+		http.Error(w, "Failed to upload image", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(fileURL))
+}
+
+func (h *MicroGreenHandler) DownloadMicroGreen(w  http.ResponseWriter, r *http.Request) {
+	fileName := r.URL.Query().Get("filename")
+	if fileName == "" {
+		http.Error(w, "Filename is required", http.StatusBadRequest)
+		return
+	}
+
+	fileURL, err := h.s3.DownloadImage(fileName)
+	if err != nil {
+		http.Error(w, "Failed to generate download URL", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(fileURL))
 }
