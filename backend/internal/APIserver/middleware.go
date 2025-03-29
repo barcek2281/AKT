@@ -64,15 +64,26 @@ func (s *APIServer) middleware(next http.Handler) http.Handler {
 
 func (s *APIServer) enableCors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		// Устанавливаем CORS заголовки
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Accept")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
+		// Обрабатываем preflight запрос
+		// if r.Method == "OPTIONS" {
+		// 	// Для preflight запросов не выполняем перенаправления
+		// 	w.WriteHeader(http.StatusOK)
+		// 	return
+		// }
+
+		// Если это не preflight запрос, добавляем заголовки безопасности
+		w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("X-XSS-Protection", "1; mode=block")
+
+		// Продолжаем обработку запроса
 		next.ServeHTTP(w, r)
 	})
 }
