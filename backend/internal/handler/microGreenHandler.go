@@ -3,7 +3,9 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/barcek2281/AKT/backend/internal/config"
 	"github.com/barcek2281/AKT/backend/internal/store"
@@ -127,43 +129,80 @@ func (h *MicroGreenHandler) DeleteMicroGreen(w http.ResponseWriter, r *http.Requ
 
 	w.WriteHeader(http.StatusOK)
 }
-
-func (h *MicroGreenHandler) AppendMicroGreen(w http.ResponseWriter, r *http.Request) {
-	user_id, ok := r.Context().Value("user_id").(string)
+func (h *MicroGreenHandler) AppendMicroGreenLog(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("user_id").(string)
 	if !ok {
-		logrus.Warn("lox")
+		logrus.Warn("Unauthorized access")
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	microgreenID := r.FormValue("microgreen_id")
+	heightStr := r.FormValue("height")
+	notes := r.FormValue("notes")
+
+	if microgreenID == "" || heightStr == "" {
+		logrus.Warn("Missing required fields")
+		http.Error(w, "Missing required fields", http.StatusBadRequest)
+		return
+	}
+
+	objectID, err := primitive.ObjectIDFromHex(microgreenID)
+	if err != nil {
+		logrus.Warn("Invalid microgreen ID format", err)
+		http.Error(w, "Invalid ID format", http.StatusBadRequest)
+		return
+	}
+
+	height, err := strconv.ParseFloat(heightStr, 64)
+	if err != nil {
+		logrus.Warn("Invalid height format", err)
+		http.Error(w, "Invalid height format", http.StatusBadRequest)
 		return
 	}
 
 	file, _, err := r.FormFile("file")
 	if err != nil {
-		log.Warn(err)
+		logrus.Warn("Failed to read file", err)
 		http.Error(w, "Failed to read file", http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
 
-	microgreen := r.FormValue("microgreen")
-	photoNum := r.FormValue("photoNum")
+	modelsGAYS, err := h.db.MicrogreenRepo.GetMicrogreensByUser(userID)
+	var res models.Microgreen
 
-	if microgreen == "" || photoNum == "" {
-		logrus.Warn("fail to find metadata", microgreen, photoNum)
-		http.Error(w, "Failed to read metadata", http.StatusBadRequest)
-		return
+	for _, m := range modelsGAYS {
+		if m.ID == objectID {
+			res = m
+		}
 	}
 
-	newFilename := strings.Join([]string{user_id, microgreen, photoNum + ".png"}, "/")
-
+	newFilename := strings.Join([]string{userID, microgreenID, strconv.Itoa(len(res.GrowthLog)+1)}, "/")
 	fileURL, err := h.s3.UploadImage(file, newFilename)
 	if err != nil {
-		log.Warn("failed to upload", err)
+		logrus.Warn("Failed to upload image", err)
 		http.Error(w, "Failed to upload image", http.StatusInternalServerError)
 		return
 	}
 
+	logEntry := models.GrowthEntry{
+		Date:     time.Now(),
+		Height:   height,
+		Notes:    notes,
+		PhotoURL: fileURL,
+	}
+
+	res.GrowthLog = append(res.GrowthLog, logEntry)
+
+	if err := h.db.MicrogreenRepo.Update(userID, res); err != nil {
+		logrus.Warn("Failed to update growth log", err)
+		http.Error(w, "Failed to update growth log", http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fileURL))
+	json.NewEncoder(w).Encode(map[string]string{"message": "Growth log updated successfully", "photo_url": fileURL})
 }
 
 func (h *MicroGreenHandler) DownloadMicroGreen(w http.ResponseWriter, r *http.Request) {

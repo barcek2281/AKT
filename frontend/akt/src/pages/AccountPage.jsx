@@ -118,10 +118,6 @@ const AccountPage = () => {
   };
 
   const handleLogout = () => {
-    // Очищаем данные пользователя из localStorage
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userData');
-    // Перенаправляем на главную страницу
     navigate('/');
   };
 
