@@ -20,41 +20,41 @@ const HomePage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const endpoint = isLogin ? '/user/login' : '/user/sign-up';
-    
-    // Отправляем данные на бэкенд
-    fetch(`https://akt-win6.onrender.com${endpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({
-        email: formData.email,
-        password: formData.password,
-        ...(isLogin ? {} : { username: formData.username })
+    console.log(isLogin ? '/user/login' : '/user/sign-up');
+    try {
+      await fetch(`https://akt-win6.onrender.com${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          ...(isLogin ? {} : { username: formData.username })
+        })
       })
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Ошибка авторизации');
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Успешная авторизация:', data);
-      // Сохраняем данные пользователя
-      localStorage.setItem('userEmail', formData.email);
-      localStorage.setItem('userData', JSON.stringify(data));
-      navigate("/account");
-    })
-    .catch(error => {
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Ошибка авторизации');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Успешная авторизация:', data);
+        // Сохраняем данные пользователя
+        localStorage.setItem('userEmail', formData.email);
+        localStorage.setItem('userData', JSON.stringify(data));
+        navigate("/account");
+      })
+    } catch (error) {
       console.error('Ошибка:', error);
-      alert('Ошибка при входе. Пожалуйста, проверьте данные и попробуйте снова.');
-    });
+      alert('Ошибка при входе. Пожалуйста, проверьте данные и попробуйте снова.');      
+    }
   };
 
   return (
