@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/barcek2281/AKT/backend/internal/APIserver"
+	"github.com/barcek2281/AKT/backend/internal/store"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
@@ -32,7 +33,8 @@ func init() {
 func main() {
 	c := APIserver.NewConfig()
 	s := APIserver.NewAPIServer(c)
-
+	store := store.Store{Config: c}
+	store.ConnectMongoDB()
 	logrus.Info("start server on port: ", c.BinAddr)
 
 	if err := s.Start(); err != nil {
