@@ -10,12 +10,11 @@ const AccountPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [userInfo, setUserInfo] = useState({ username: '', email: '' });
   const [userPlants, setUserPlants] = useState([
-    { id: '1', name: 'Монстера', type: 'Декоративное', sbor: '30', addedDate: '2024-03-15', status: 'Активное', lastWatered: '2024-03-20', humidity: '60%', substrate: 'Грунт', atmosphere: 'Открытый воздух' },
-    { id: '2', name: 'Фикус', type: 'Декоративное', sbor: '45', addedDate: '2024-03-10', status: 'Активное', lastWatered: '2024-03-19', humidity: '55%', substrate: 'Гидропоника', atmosphere: 'Теплица' }
+    { id: '1', name: 'Монстера', type: 'Комнатное', sbor: '30', addedDate: '2024-03-15', status: 'Активное', lastWatered: '2024-03-20', substrate: 'Почва', humidity: '60', atmosphere: 'Открытое пространство' },
+    { id: '2', name: 'Фикус', type: 'Комнатное', sbor: '45', addedDate: '2024-03-10', status: 'Активное', lastWatered: '2024-03-19', substrate: 'Гидропоника', humidity: '55', atmosphere: 'Теплица' }
   ]);
   const [isAddPlantModalOpen, setIsAddPlantModalOpen] = useState(false);
-  const [newPlant, setNewPlant] = useState({ name: '', type: '', sowingDate: new Date(), sbor: '', humidity: '', substrate: 'Грунт', atmosphere: 'Открытый воздух' });
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [newPlant, setNewPlant] = useState({ name: '', type: '', sbor: '', addedDate: new Date().toISOString().split('T')[0], substrate: 'Почва', humidity: '', atmosphere: 'Открытое пространство' });
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -39,7 +38,7 @@ const AccountPage = () => {
   const handleLogout = async () => {
     await AsyncStorage.removeItem('userEmail');
     await AsyncStorage.removeItem('userData');
-    router.push('/index');
+    router.push('/index')
   };
 
   const handleAddPlant = () => {
@@ -47,7 +46,7 @@ const AccountPage = () => {
       const newPlantWithId = { ...newPlant, id: (userPlants.length + 1).toString() };
       setUserPlants([...userPlants, newPlantWithId]);
       setIsAddPlantModalOpen(false);
-      setNewPlant({ name: '', type: '', sowingDate: new Date(), sbor: '', humidity: '', substrate: 'Грунт', atmosphere: 'Открытый воздух' });
+      setNewPlant({ name: '', type: '', sbor: '', addedDate: new Date().toISOString().split('T')[0], substrate: 'Почва', humidity: '', atmosphere: 'Открытое пространство' });
     }
   };
 
@@ -57,13 +56,6 @@ const AccountPage = () => {
         <Text style={styles.title}>Личный кабинет</Text>
         <Button title="Выйти" onPress={handleLogout} color="red" />
       </View>
-
-      <View style={styles.profileSection}>
-        <Text style={styles.subtitle}>Профиль</Text>
-        <Text>Имя пользователя: {userInfo.username}</Text>
-        <Text>Email: {userInfo.email}</Text>
-      </View>
-
       <View style={styles.plantsSection}>
         <Text style={styles.subtitle}>Мои растения</Text>
         <FlatList
@@ -74,13 +66,14 @@ const AccountPage = () => {
               <Text style={styles.plantName}>{item.name}</Text>
               <Text>Тип: {item.type}</Text>
               <Text>Дни до сбора: {item.sbor}</Text>
-              <Text>Влажность: {item.humidity}</Text>
+              <Text>Дата посева: {item.addedDate}</Text>
               <Text>Субстрат: {item.substrate}</Text>
+              <Text>Влажность: {item.humidity}%</Text>
               <Text>Атмосфера: {item.atmosphere}</Text>
             </View>
           )}
         />
-        <Button title="Добавить растение" onPress={() => setIsAddPlantModalOpen(true)} />
+        <Button style={styles.addButton} title="Добавить растение" onPress={() => setIsAddPlantModalOpen(true)} />
       </View>
 
       <Modal visible={isAddPlantModalOpen} animationType="slide">
@@ -88,36 +81,105 @@ const AccountPage = () => {
           <Text style={styles.subtitle}>Добавить растение</Text>
           <TextInput placeholder="Название растения" style={styles.inputModal} value={newPlant.name} onChangeText={(text) => setNewPlant({ ...newPlant, name: text })} />
           <TextInput placeholder="Тип растения" style={styles.inputModal} value={newPlant.type} onChangeText={(text) => setNewPlant({ ...newPlant, type: text })} />
-          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-            <Text>Дата посева: {newPlant.sowingDate.toLocaleDateString()}</Text>
-          </TouchableOpacity>
-          {showDatePicker && (
-            <DateTimePicker
-              value={newPlant.sowingDate}
-              mode="date"
-              display="default"
-              onChange={(event, date) => {
-                setShowDatePicker(false);
-                if (date) setNewPlant({ ...newPlant, sowingDate: date });
-              }}
-            />
-          )}
           <TextInput placeholder="Дни до сбора" keyboardType="numeric" style={styles.inputModal} value={newPlant.sbor} onChangeText={(text) => setNewPlant({ ...newPlant, sbor: text })} />
-          <TextInput placeholder="Влажность (%)" keyboardType="numeric" style={styles.inputModal} value={newPlant.humidity} onChangeText={(text) => setNewPlant({ ...newPlant, humidity: text })} />
-          <Picker selectedValue={newPlant.substrate} onValueChange={(itemValue) => setNewPlant({ ...newPlant, substrate: itemValue })}>
-            <Picker.Item label="Грунт" value="Грунт" />
+          <Text>Дата посева:</Text>
+          <DateTimePicker style={styles.dateModal} value={new Date()} mode="date" display="default" onChange={(event, selectedDate) => setNewPlant({ ...newPlant, addedDate: selectedDate.toISOString().split('T')[0] })} />
+          {/* <Text>Субстрат:</Text>
+          {/* <Picker selectedValue={newPlant.substrate} onValueChange={(itemValue) => setNewPlant({ ...newPlant, substrate: itemValue })}>
+            <Picker.Item label="Почва" value="Почва" />
             <Picker.Item label="Гидропоника" value="Гидропоника" />
-          </Picker>
+          </Picker> */}
+          <TextInput placeholder="Влажность (%)" keyboardType="numeric" style={styles.inputModal} value={newPlant.humidity} onChangeText={(text) => setNewPlant({ ...newPlant, humidity: text })} />
+          {/* <Text>Атмосфера:</Text>
           <Picker selectedValue={newPlant.atmosphere} onValueChange={(itemValue) => setNewPlant({ ...newPlant, atmosphere: itemValue })}>
-            <Picker.Item label="Открытый воздух" value="Открытый воздух" />
+            <Picker.Item label="Открытое пространство" value="Открытое пространство" />
             <Picker.Item label="Теплица" value="Теплица" />
-          </Picker>
-          <Button title="Добавить" onPress={handleAddPlant} color="green" />
-          <Button title="Отмена" onPress={() => setIsAddPlantModalOpen(false)} color="red" />
+          </Picker> */}
+          <View style={styles.modalButtons}>
+            <TouchableOpacity style={styles.modalButtonAdd} onPress={handleAddPlant}>
+              <Text style={styles.modalButtonText}>Добавить</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalButtonCancel} onPress={() => setIsAddPlantModalOpen(false)}>
+              <Text style={styles.modalButtonText}>Отмена</Text>
+            </TouchableOpacity>
+          </View>
+          
         </View>
       </Modal>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#f5f5f5'
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold'
+  },
+  subtitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 50
+  },
+  plantCard: {
+    backgroundColor: "#e0e0e0",
+    marginTop: 10,
+    borderRadius: 15,
+    padding: 10,
+  },
+  plantName: {
+    fontWeight: 600,
+    marginBottom: 10,
+  },
+
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 20,
+    backgroundColor: 'white'
+  },
+  inputModal: {
+    marginTop: 20,
+    borderWidth: 1,
+    padding: 8,
+    marginBottom: 10,
+    borderRadius: 5
+  },
+  dateModal: {
+    marginTop: 10,
+  },
+  modalButtons: {
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  modalButtonAdd: {
+    backgroundColor: 'green',
+    width: 200,
+    borderRadius: 25,
+    alignItems: "center",
+    padding: 10,
+  },
+  modalButtonCancel: {
+    marginTop: 10,
+    backgroundColor: "red",
+    width: 200,
+    borderRadius: 25,
+    alignItems:"center",
+    padding: 10
+  },
+  modalButtonText: {
+    color: "white"
+  }
+});
 
 export default AccountPage;
