@@ -23,10 +23,18 @@ func NewAPIServer(config *config.Config) *APIServer {
 	}
 }
 
+type contextKey string
+
+const (
+    userEmailKey contextKey = "user_email"
+    userIDKey   contextKey = "user_id"
+)
+
 func (s *APIServer) Start() error {
 	s.ConfigureRouter()
 	return http.ListenAndServe(fmt.Sprintf(":%d", s.config.BinAddr), s.mux)
 }
+
 
 func (s *APIServer) ConfigureRouter() {
 	s.mux.HandleFunc("GET /hello", func(w http.ResponseWriter, r *http.Request) {
@@ -34,5 +42,5 @@ func (s *APIServer) ConfigureRouter() {
 	})
 	s.mux.Handle("POST /user/sign-up", http.HandlerFunc(s.handlerUser.SignUp))
 	s.mux.Handle("POST /user/login", s.middleware(http.HandlerFunc(s.handlerUser.LogIn)))
-	
+	s.mux.Handle("POST /user/get-info", s.middleware(http.HandlerFunc(s.handlerUser.GetInfo)))
 }

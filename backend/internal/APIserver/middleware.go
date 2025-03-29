@@ -11,10 +11,12 @@ import (
 )
 
 type UserClaims struct {
-	Username string `json:"username"`
-	Email  string `json:"email"`
-	jwt.RegisteredClaims	
+    UserID   string `json:"user_id"`
+    Email    string `json:"email"`
+    Username string `json:"username"`
+    jwt.RegisteredClaims
 }
+
 
 func (s *APIServer) middleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -39,23 +41,20 @@ func (s *APIServer) middleware(next http.Handler) http.Handler {
             if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
                 return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
             }
-            // Убедитесь, что s.config.JwtKey является []byte
-            return []byte(s.config.JwtKey), nil // Конвертируем строку в []byte
+            return []byte(s.config.JwtKey), nil
         })
 
-        if err != nil {
+        if err != nil || !token.Valid {
             log.Printf("JWT validation error: %v", err)
             http.Error(w, "Unauthorized: Invalid token", http.StatusUnauthorized)
             return
         }
 
-        if !token.Valid {
-            http.Error(w, "Unauthorized: Invalid token", http.StatusUnauthorized)
-            return
-        }
-
         // Добавляем claims в контекст
-        ctx := context.WithValue(r.Context(), "user", claims.Username)
+        ctx := r.Context()
+        ctx = context.WithValue(ctx, userEmailKey, claims.Email)
+        ctx = context.WithValue(ctx, userIDKey, claims.UserID) // Убедитесь, что UserClaims содержит UserID
+        
         next.ServeHTTP(w, r.WithContext(ctx))
     })
-}
+}	

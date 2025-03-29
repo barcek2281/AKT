@@ -11,6 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type UserHandler struct {
@@ -102,16 +103,18 @@ func (u *UserHandler) LogIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UserHandler) generateJWT(userID primitive.ObjectID, email string) (string, error) {
-	claims := jwt.MapClaims{
-		"user_id": userID.Hex(),
-		"email":   email,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(), // Токен на 24 часа
-	}
+    claims := UserClaims{
+        UserID:   userID.Hex(),
+        Email:    email,
+        Username: email, // или другое имя пользователя
+        RegisteredClaims: jwt.RegisteredClaims{
+            ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+        },
+    }
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(u.config.JwtKey))
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    return token.SignedString([]byte(u.config.JwtKey))
 }
-
 func setAuthCookie(w http.ResponseWriter, token string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
@@ -132,4 +135,35 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	json.NewEncoder(w).Encode(payload)
+}
+
+func (u *UserHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
+    // Получаем email пользователя из контекста
+    ctx := r.Context()
+    email, ok := ctx.Value(userEmailKey).(string)
+    if !ok || email == "" {
+        respondWithError(w, http.StatusUnauthorized, "User not authenticated")
+        return
+    }
+
+    // Получаем пользователя из базы данных
+    user, err := u.db.UserRepo.GetUserByEmail(email)
+    if err != nil {
+        if err == mongo.ErrNoDocuments {
+            respondWithError(w, http.StatusNotFound, "User not found")
+            return
+        }
+        respondWithError(w, http.StatusInternalServerError, "Failed to get user info")
+        log.Printf("Failed to get user by email: %v", err)
+        return
+    }
+
+    // Не возвращаем пароль
+    user.Password = ""
+    
+    respondWithJSON(w, http.StatusOK, map[string]interface{}{
+        "user_id": user.ID.Hex(),
+        "email":   user.Email,
+        "name":    user.Name,
+    })
 }
