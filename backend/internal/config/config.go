@@ -6,17 +6,20 @@ import (
 )
 
 type Config struct {
-	BinAddr int
+	BinAddr    int
 	APImongoDB string
+	JwtKey     string
 }
 
 func NewConfig() *Config {
 	addr := getEnv("addr", "8080")
 	binAddr, _ := strconv.Atoi(addr)
 	APImongoDB := getEnv("MONGO", "")
+	jwtKey := getEnv("JWT_KEY", "")
 	return &Config{
-		BinAddr: binAddr,
+		BinAddr:    binAddr,
 		APImongoDB: APImongoDB,
+		JwtKey:     jwtKey,
 	}
 }
 

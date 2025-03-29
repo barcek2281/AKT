@@ -115,21 +115,28 @@ const AccountPage = () => {
           </div>
         </div>
 
-        <div className="account-stats">
-          <h2>Статистика</h2>
-          <div className="stats-grid">
-            <div className="stat-card" onClick={() => handleNavigate('/dashboard')}>
-              <span className="stat-value">12</span>
-              <span className="stat-label">Растений</span>
-            </div>
-            <div className="stat-card" onClick={() => handleNavigate('/scan')}>
-              <span className="stat-value">5</span>
-              <span className="stat-label">Сканирований</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-value">3</span>
-              <span className="stat-label">Достижений</span>
-            </div>
+        <div className="user-plants-section">
+          <div className='user-plants-header'>
+            <h2>Мои растения</h2>
+            <button> + </button>
+          </div>
+          <div className="plants-list">
+            {userPlants.map(plant => (
+              <div key={plant.id} className="plant-card">
+                <div className="plant-info">
+                  <h3>{plant.name}</h3>
+                  <div className="plant-details">
+                    <span>Добавлено: {plant.addedDate}</span>
+                    <span>Статус: {plant.status}</span>
+                    <span>Последний полив: {plant.lastWatered}</span>
+                  </div>
+                </div>
+                <button className="view-plant-button" onClick={() => navigate(`/details/${plant.id}`)}>
+                  Подробнее
+                </button>
+              </div>
+            ))}
+
           </div>
         </div>
       </div>

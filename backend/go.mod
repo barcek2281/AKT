@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
@@ -26,6 +27,7 @@ require (
 )
 
 require (
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	golang.org/x/sys v0.31.0 // indirect
 )

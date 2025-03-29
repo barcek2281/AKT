@@ -43,9 +43,6 @@ const HomePage = () => {
     <div className="home-page">
       <div className="auth-container">
         <div className="auth-header">
-          <button className="back-button" onClick={() => navigate(-1)}>
-            ←
-          </button>
           <h1>{isLogin ? "Добро пожаловать!" : "Создать аккаунт"}</h1>
         </div>
 
