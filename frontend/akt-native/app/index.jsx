@@ -109,7 +109,7 @@ const HomePage = () => {
             // onChangeText={(value) => handleInputChange("confirmPassword", value)}
           />
         )}
-        <TouchableOpacity style={styles.button} onPress={() => router.push("/account")}> 
+        <TouchableOpacity style={styles.button} onPress={() => router.push("/dashboard")}> 
           <Text style={styles.buttonText}>{isLogin ? "Войти" : "Зарегистрироваться"}</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
