@@ -169,6 +169,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 10,
   },
+
   modalButtonCancel: {
     marginTop: 10,
     backgroundColor: "red",

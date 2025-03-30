@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 
@@ -8,6 +9,9 @@ const Details = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Plant Details</Text>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.imageContainer}>
@@ -76,7 +80,21 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 20,
+  },
+  backButton: {
+    backgroundColor: 'red',
+    width: 40,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  backText: {
+    color: 'white',
   },
   headerText: {
     fontSize: 24,
@@ -139,6 +157,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
+
   button: {
     backgroundColor: '#4CAF50',
     padding: 15,
