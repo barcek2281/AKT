@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, Modal, StyleSheet } from 'react-native';
 import { RNCamera } from 'react-native-camera';
@@ -47,6 +48,11 @@ const ScanPage = () => {
           <Text style={styles.buttonText}>{isScanning ? 'Сканирование...' : 'Сканировать'}</Text>
         </TouchableOpacity>
       </View>
+        <View style={styles.backBaton}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Text style={styles.backText}>Назад</Text>
+          </TouchableOpacity>
+        </View>
     </View>
   );
 };
@@ -83,6 +89,20 @@ const styles = StyleSheet.create({
   camera: { 
     width: '100%', 
     height: '100%' 
+},
+backButton: {
+  marginTop: 20,
+  backgroundColor: 'red',
+  width: 150,
+  height: 40,
+  borderRadius: 10,
+  alignItems: 'center',
+  justifyContent: 'center'
+},
+backText: {
+  color: 'white',
+  fontWeight: 600,
+  fontSize: 17,
 },
   plantPreview: { 
     width: 250, 
